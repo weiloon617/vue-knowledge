@@ -108,7 +108,7 @@ import {
   sameAs,
   requiredUnless
 } from "vuelidate/lib/validators";
-import axios from "../../axios-auth";
+import axios from "axios";
 
 export default {
   data() {
@@ -134,8 +134,7 @@ export default {
         return axios
           .get('/user.json?orderBy="email"&equalTo="' + val + '"')
           .then(res => {
-            console.log(res);
-            return false;
+            return Object.keys(res.data).length === 0;
           })
           .catch(error => {
             console.log(error);
@@ -193,11 +192,7 @@ export default {
         hobbies: this.hobbyInputs.map(hobby => hobby.value),
         terms: this.terms
       };
-      console.log(formData);
-      this.$store.dispatch("signup", {
-        email: formData.email,
-        password: formData.password
-      });
+      this.$store.dispatch("signup", formData);
     }
   }
 };

@@ -28,6 +28,12 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    /**
+     * 组册账号
+     * @param commit
+     * @param dispatch
+     * @param authData
+     */
     signup({ commit, dispatch }, authData) {
       axios
         .post("/accounts:signUp?key=AIzaSyCUeiJE0PviwU2XLzZ2C-qD0_SnJnNh5ns", {
@@ -36,25 +42,34 @@ export default new Vuex.Store({
           returnSecureToken: true
         })
         .then(res => {
-          console.log(res);
           const { data } = res;
+          const { idToken, localId, expiresIn } = data;
+
           commit("authUser", {
-            token: data.idToken,
-            userId: data.localId
+            token: idToken,
+            userId: localId
           });
+
           const now = new Date();
-          const expirationDate = new Date(
-            now.getTime() + data.expiresIn * 1000
-          );
-          localStorage.setItem("token", data.idToken);
-          localStorage.setItem("userId", data.localId);
+          const expirationDate = new Date(now.getTime() + expiresIn * 1000);
+
+          localStorage.setItem("token", idToken);
+          localStorage.setItem("userId", localId);
           localStorage.setItem("expirationDate", expirationDate);
+
           dispatch("storeUser", authData);
-          dispatch("setLogoutTimer", data.expiresIn);
+          dispatch("setLogoutTimer", expiresIn);
+
           router.replace("/dashboard");
         })
         .catch(error => console.log(error));
     },
+    /**
+     * 用户登录
+     * @param commit
+     * @param dispatch
+     * @param authData
+     */
     login({ commit, dispatch }, authData) {
       axios
         .post(
@@ -66,44 +81,67 @@ export default new Vuex.Store({
           }
         )
         .then(res => {
-          console.log(res);
           const { data } = res;
-          const now = new Date();
-          const expirationDate = new Date(
-            now.getTime() + data.expiresIn * 1000
-          );
-          localStorage.setItem("token", data.idToken);
-          localStorage.setItem("userId", data.localId);
-          localStorage.setItem("expirationDate", expirationDate);
+          const { idToken, localId, expiresIn } = data;
+
           commit("authUser", {
-            token: data.idToken,
-            userId: data.localId
+            token: idToken,
+            userId: localId
           });
-          dispatch("setLogoutTimer", data.expiresIn);
+
+          const now = new Date();
+          const expirationDate = new Date(now.getTime() + expiresIn * 1000);
+
+          localStorage.setItem("token", idToken);
+          localStorage.setItem("userId", localId);
+          localStorage.setItem("expirationDate", expirationDate);
+
+          dispatch("setLogoutTimer", expiresIn);
+
           router.replace("/dashboard");
         })
         .catch(error => console.log(error));
     },
+    /**
+     * 查看是否在登录状态
+     * @param commit
+     */
     tryAutoLogin({ commit }) {
       const token = localStorage.getItem("token");
       if (!token) {
         return;
       }
+
       const expirationDate = localStorage.getItem("expirationDate");
       const now = new Date();
+
       if (now >= expirationDate) {
         return;
       }
+
       const userId = localStorage.getItem("userId");
+
       commit("authUser", { token, userId });
     },
+    /**
+     * 帐号登出
+     * @param commit
+     */
     logout({ commit }) {
       commit("clearAuthData");
+
       localStorage.removeItem("token");
       localStorage.removeItem("expirationDate");
       localStorage.removeItem("userId");
+
       router.replace("/signin");
     },
+    /**
+     * 设置登出时间
+     * @param commit
+     * @param dispatch
+     * @param expirationTime
+     */
     setLogoutTimer({ commit, dispatch }, expirationTime) {
       setTimeout(() => dispatch("logout"), expirationTime * 1000);
     },
@@ -116,6 +154,11 @@ export default new Vuex.Store({
         .then(res => console.log(res))
         .catch(error => console.log(error));
     },
+    /**
+     * 获取用户资讯
+     * @param commit
+     * @param state
+     */
     fetchUser({ commit, state }) {
       if (!state.idToken) {
         return;
@@ -123,7 +166,6 @@ export default new Vuex.Store({
       globalAxios
         .get("/user.json" + "?auth=" + state.idToken)
         .then(res => {
-          console.log(res);
           const data = res.data;
           const users = [];
           for (let key in data) {
@@ -131,6 +173,7 @@ export default new Vuex.Store({
             user.id = key;
             users.push(user);
           }
+
           commit("storeUser", users[0]);
         })
         .catch(error => console.log(error));
