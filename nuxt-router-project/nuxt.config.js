@@ -1,3 +1,5 @@
+const bodyParser = require("body-parser");
+
 export default {
   mode: "universal",
   /*
@@ -62,5 +64,6 @@ export default {
   transition: {
     name: "fade",
     mode: "out-in"
-  }
+  },
+  serverMiddleware: [bodyParser.json(), "~/api"]
 };
