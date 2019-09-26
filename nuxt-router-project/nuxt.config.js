@@ -58,15 +58,27 @@ export default {
      */
     extend(config, ctx) {}
   },
+  /*
+   ** Process Environment
+   */
   env: {
     baseUrl: process.env.BASE_URL || "https://nuxt-blog-4801f.firebaseio.com",
     fbAPIKey: "AIzaSyDVgFAJ0kBrZp348Cf7ek0swo9UDd150dk"
   },
+  /*
+   ** Change page animation
+   */
   transition: {
     name: "fade",
     mode: "out-in"
   },
+  /*
+   ** Server middleware
+   */
   serverMiddleware: [bodyParser.json(), "~/api"],
+  /*
+   ** Configuration for production build files
+   */
   generate: {
     routes: function() {
       return axios

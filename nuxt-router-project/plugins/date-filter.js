@@ -1,3 +1,7 @@
+/**
+ * ~plugins/date-filter.js
+ * Vue filter
+ */
 import Vue from "vue";
 
 const months = [

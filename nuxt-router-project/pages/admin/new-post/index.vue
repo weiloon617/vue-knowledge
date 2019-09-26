@@ -7,10 +7,8 @@
 </template>
 
 <script>
-import AdminPostForm from "~/components/Admin/AdminPostForm";
 export default {
   name: "NewPost",
-  components: { AdminPostForm },
   layout: "admin",
   middleware: ["check-auth", "auth"],
   methods: {
